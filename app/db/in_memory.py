@@ -15,6 +15,10 @@ class Database:
    
     def __init__(self) -> None:
         self.tables = defaultdict(list)
+        self.tables['users'] = [
+            dict(id=1, name="Md. Atiqul Islam", username="atiqul", hashed_password="$2b$12$Uk7ATB/OtBrU7qiM.sLPoeB1MoLz1C3qQddR/5jVlkxPnJ1GKBdHq"),
+            dict(id=2, name="Md. Atiqul Islam", username="atiqul2", hashed_password="$2b$12$Uk7ATB/OtBrU7qiM.sLPoeB1MoLz1C3qQddR/5jVlkxPnJ1GKBdHq")
+        ]
 
     def __new__(cls, *args, **kwargs):
         if not isinstance(cls._instance, cls):
