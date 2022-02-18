@@ -1,8 +1,11 @@
 from fastapi.testclient import TestClient
-
+from app.authentication import IN_MEMORY_DB
+from app.db import Database
 from main import app
 
 client = TestClient(app)
+
+IN_MEMORY_DB = Database()
 
 
 def test_registration():
@@ -64,3 +67,32 @@ def test_tweet():
         json=dict(body="This is my first tweet")
     )
     assert response.status_code == 201
+
+
+def test_feed():
+    IN_MEMORY_DB.reset()
+
+    token = client.post(
+        "/v1/token",
+        data={"username": "atiqul", "password": "string"},
+    ).json()
+
+    client.post(
+        "/v1/tweet",
+        headers=dict(Authorization=f"{token['token_type']} {token['access_token']}"),
+        json=dict(body="This is my first tweet")
+    )
+
+    client.post(
+        "/v1/tweet",
+        headers=dict(Authorization=f"{token['token_type']} {token['access_token']}"),
+        json=dict(body="This is my second tweet")
+    )
+    
+    response = client.get(
+        "/v1/feed",
+        headers=dict(Authorization=f"{token['token_type']} {token['access_token']}"),
+    )
+    response_body = [tweet["body"] for tweet in response.json()]
+    assert response.status_code == 200
+    assert response_body == ["This is my second tweet", "This is my first tweet"]

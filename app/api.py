@@ -64,4 +64,13 @@ def create_tweet(tweet: TweetModel, current_user: User = Depends(get_current_use
     tweet_model = Tweet(**dict(user_id=current_user.id, body=tweet.body))
     IN_MEMORY_DB.insert('tweets', tweet_model.dict())
 
-    
+
+@router.get('/feed', status_code=status.HTTP_200_OK, response_model=List[Tweet])
+def create_tweet(current_user: User = Depends(get_current_user)):
+    user_follow = IN_MEMORY_DB.find('user_follow', user_id=current_user.id)
+    users_id = [current_user.id] + [user["follow_user_id"] for user in user_follow]
+
+    tweets = IN_MEMORY_DB.find_in('tweets', user_id=users_id)
+
+    tweets.sort(key=lambda item: item['created_at'], reverse=True)
+    return tweets
