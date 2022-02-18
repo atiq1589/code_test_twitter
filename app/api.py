@@ -43,3 +43,18 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @router.get("/users/me/", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.post('/follow', status_code=status.HTTP_201_CREATED,)
+async def follow_user(follow_user_id: int, response: Response, current_user: User = Depends(get_current_user),):
+    result = IN_MEMORY_DB.find('user_follow', user_id=current_user.id, follow_user_id=follow_user_id)
+    follow_user = IN_MEMORY_DB.find('users', id=follow_user_id)
+    if follow_user_id == current_user.id:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return dict(message="User can't follow ownself.")
+    if not follow_user:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return dict(message="Requested User not found.")
+    if not result:
+        IN_MEMORY_DB.insert("user_follow", dict(user_id=current_user.id, follow_user_id=follow_user_id))
+    

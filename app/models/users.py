@@ -7,7 +7,7 @@ class User(BaseModel):
     User model 
     Replicate DB record
     """   
-    _USER_COUNT: int = 0 # will be replaced in future with real db
+    _USER_COUNT: int = 2 # will be replaced in future with real db
     id: Optional[int] = None
     name: str
     username: str
