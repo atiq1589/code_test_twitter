@@ -14,11 +14,7 @@ class Database:
     _instance = None
    
     def __init__(self) -> None:
-        self.tables = defaultdict(list)
-        self.tables['users'] = [
-            dict(id=1, name="Md. Atiqul Islam", username="atiqul", hashed_password="$2b$12$Uk7ATB/OtBrU7qiM.sLPoeB1MoLz1C3qQddR/5jVlkxPnJ1GKBdHq"),
-            dict(id=2, name="Md. Atiqul Islam", username="atiqul2", hashed_password="$2b$12$Uk7ATB/OtBrU7qiM.sLPoeB1MoLz1C3qQddR/5jVlkxPnJ1GKBdHq")
-        ]
+        self.reset()
 
     def __new__(cls, *args, **kwargs):
         if not isinstance(cls._instance, cls):
@@ -77,3 +73,40 @@ class Database:
             raise Exception("Invalid Query")
         else:
             return result
+    
+    def find_in(self, table_name: str, **kwargs) -> list:
+        """
+        This method will find entries form table for given query
+        It will perform 'IN' query
+
+        Parameters:
+        -----------
+        table_name: str
+            Table name for run the query
+        kwargs: dict
+            Any given keyword arguments that will test the table for result
+        
+        Raises:
+        -------
+        Exception
+            if key not found in the table rows
+        
+        Return:
+        -------
+        list
+            Will return list of dictionary against the query
+        """
+        try:
+            query = filter(lambda entry: all(entry[key] in value for key,value in kwargs.items()), self.tables[table_name])
+            result = list(query)
+        except Exception:
+            raise Exception("Invalid Query")
+        else:
+            return result
+    
+    def reset(self):
+        self.tables = defaultdict(list)
+        self.tables['users'] = [
+            dict(id=1, name="Md. Atiqul Islam", username="atiqul", hashed_password="$2b$12$Uk7ATB/OtBrU7qiM.sLPoeB1MoLz1C3qQddR/5jVlkxPnJ1GKBdHq"),
+            dict(id=2, name="Md. Atiqul Islam", username="atiqul2", hashed_password="$2b$12$Uk7ATB/OtBrU7qiM.sLPoeB1MoLz1C3qQddR/5jVlkxPnJ1GKBdHq")
+        ] 
