@@ -1,6 +1,6 @@
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, constr
-
 
 class Tweet(BaseModel):
     """
@@ -11,6 +11,7 @@ class Tweet(BaseModel):
     id: Optional[int] = None
     user_id: int
     body: constr(min_length=3, max_length=140)
+    created_at: datetime = datetime.utcnow()
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

@@ -51,3 +51,16 @@ def test_follow():
         headers=dict(Authorization=f"{token['token_type']} {token['access_token']}")
     )
     assert response.status_code == 201
+
+def test_tweet():
+    token = client.post(
+        "/v1/token",
+        data={"username": "atiqul", "password": "string"},
+    ).json()
+
+    response = client.post(
+        "/v1/tweet",
+        headers=dict(Authorization=f"{token['token_type']} {token['access_token']}"),
+        json=dict(body="This is my first tweet")
+    )
+    assert response.status_code == 201

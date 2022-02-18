@@ -1,6 +1,6 @@
-from app.db import Database
-from app.models import User
-from app.models.forms import UserRegistrationModel
+from app.db import Database, in_memory
+from app.models import User, Tweet
+from app.models.forms import UserRegistrationModel, TweetModel
 from app.authentication import get_password_hash, Token, authenticate_user, create_access_token, get_current_user
 from fastapi import APIRouter, Response, status, Depends, HTTPException
 from typing import List
@@ -45,8 +45,8 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.post('/follow', status_code=status.HTTP_201_CREATED,)
-async def follow_user(follow_user_id: int, response: Response, current_user: User = Depends(get_current_user),):
+@router.post('/follow', status_code=status.HTTP_201_CREATED)
+async def follow_user(follow_user_id: int, response: Response, current_user: User = Depends(get_current_user)):
     result = IN_MEMORY_DB.find('user_follow', user_id=current_user.id, follow_user_id=follow_user_id)
     follow_user = IN_MEMORY_DB.find('users', id=follow_user_id)
     if follow_user_id == current_user.id:
@@ -57,4 +57,11 @@ async def follow_user(follow_user_id: int, response: Response, current_user: Use
         return dict(message="Requested User not found.")
     if not result:
         IN_MEMORY_DB.insert("user_follow", dict(user_id=current_user.id, follow_user_id=follow_user_id))
+
+
+@router.post('/tweet', status_code=status.HTTP_201_CREATED)
+def create_tweet(tweet: TweetModel, current_user: User = Depends(get_current_user)):
+    tweet_model = Tweet(**dict(user_id=current_user.id, body=tweet.body))
+    IN_MEMORY_DB.insert('tweets', tweet_model.dict())
+
     
