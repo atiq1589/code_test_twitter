@@ -11,9 +11,15 @@ class Database:
     This class will provide simple python dictionary
     to store metadata that gives a feel like Database
     """
-
+    _instance = None
+   
     def __init__(self) -> None:
         self.tables = defaultdict(list)
+
+    def __new__(cls, *args, **kwargs):
+        if not isinstance(cls._instance, cls):
+            cls._instance = super(Database, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
 
     def insert(self, table_name: str, model: dict) -> bool:
         """
