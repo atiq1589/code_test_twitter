@@ -1,10 +1,9 @@
-from random import random
+from .db import Database
+from .models import User
+from .models.forms import UserRegistrationModel
+from .authentication import get_password_hash, Token, authenticate_user, create_access_token, get_current_user
 from fastapi import FastAPI, Response, status, Depends, HTTPException
-from db import Database
-from models import User
-from models.forms import UserRegistrationModel
 from typing import List
-from authentication import get_password_hash, Token, authenticate_user, create_access_token, get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
 
 app = FastAPI()

@@ -1,13 +1,13 @@
+from .db import Database
+from .models.users import User
 from datetime import datetime, timedelta
 from typing import Optional
-from db import Database
-from models.users import User
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
+
 
 # to get a string like this run:
 # openssl rand -hex 32

@@ -1,1 +1,1 @@
-from .authentication import UserLoginModel, UserRegistrationModel
+from .authentication import UserRegistrationModel
