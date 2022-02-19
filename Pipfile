@@ -8,6 +8,7 @@ fastapi = {extras = ["all"], version = "*"}
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
 pytest = "*"
+aioredis = "*"
 
 [dev-packages]
 
