@@ -1,0 +1,66 @@
+version: "3"
+
+services:
+  api-server:
+    container_name: tweeter_api_server
+    build:
+      context: .
+      dockerfile: .
+    command: pipenv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/var/www/source_code
+    ports:
+      - 8000:8000
+    networks:
+      - tweeter_redis_replica_cluster
+
+  redis-repl-node1:
+    image: redis:6.2.6
+    container_name: tweeter_master_redis_node
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - tweeter_redis_replica_cluster
+  
+  redis-repl-node2:
+    image: redis:6.2.6
+    container_name: tweeter_secondary_redis_node_01
+    command: redis-server --replicaOf tweeter_master_redis_node 6379
+    restart: always
+    depends_on:
+      - redis-repl-node1
+    ports:
+      - 6380:6379
+    networks:
+      - tweeter_redis_replica_cluster
+
+  redis-repl-node3:
+    image: redis:6.2.6
+    container_name: tweeter_secondary_redis_node_02
+    command: redis-server --replicaOf tweeter_master_redis_node 6379
+    restart: always
+    depends_on:
+      - redis-repl-node1
+    ports:
+      - 6381:6379
+    networks:
+      - tweeter_redis_replica_cluster
+  
+  redis-node-sentinel:
+    image: redis:6.2.6
+    command: redis-server /redis-sentinel/sentinel.conf --sentinel
+    volumes:
+      - ./configs/sentinel.conf:/redis-sentinel/sentinel.conf
+    restart: always
+    depends_on:
+      - redis-repl-node1
+    ports:
+      - '26379-26383:26379'
+    networks:
+      - tweeter_redis_replica_cluster
+
+networks:
+  tweeter_redis_replica_cluster:
+
+  
