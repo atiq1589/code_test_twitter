@@ -1,8 +1,10 @@
+import asyncio
+from app.cache import set_cache, get_cache
 from app.db import Database, in_memory
 from app.models import User, Tweet
 from app.models.forms import UserRegistrationModel, TweetModel
 from app.authentication import get_password_hash, Token, authenticate_user, create_access_token, get_current_user
-from fastapi import APIRouter, Response, status, Depends, HTTPException
+from fastapi import APIRouter, Response, status, Depends, HTTPException, BackgroundTasks
 from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -66,11 +68,21 @@ def create_tweet(tweet: TweetModel, current_user: User = Depends(get_current_use
 
 
 @router.get('/feed', status_code=status.HTTP_200_OK, response_model=List[Tweet])
-def create_tweet(current_user: User = Depends(get_current_user)):
-    user_follow = IN_MEMORY_DB.find('user_follow', user_id=current_user.id)
-    users_id = [current_user.id] + [user["follow_user_id"] for user in user_follow]
+async def create_tweet(background_tasks: BackgroundTasks, current_user: User = Depends(get_current_user)):
+    follow_key = f"{current_user.id}_USER_FOLLOW"
+    feed_key = f"{current_user.id}_USER_FEED"
+    feed = await get_cache(feed_key)
+    user_follow = []
+    if not feed:
+        user_follow = await get_cache(follow_key)
 
-    tweets = IN_MEMORY_DB.find_in('tweets', user_id=users_id)
+    if not user_follow and not feed:
+        user_follow = IN_MEMORY_DB.find('user_follow', user_id=current_user.id)
+        background_tasks.add_task(set_cache, follow_key, [current_user.id] + [user["follow_user_id"] for user in user_follow])
 
-    tweets.sort(key=lambda item: item['created_at'], reverse=True)
-    return tweets
+    if not feed:
+        feed = IN_MEMORY_DB.find_in('tweets', user_id=user_follow)
+        feed.sort(key=lambda item: item['created_at'], reverse=True)
+        background_tasks.add_task(set_cache, feed_key, feed, ex=30)
+        
+    return feed
