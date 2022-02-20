@@ -7,7 +7,7 @@ from app.authentication import get_password_hash, Token, authenticate_user, crea
 from fastapi import APIRouter, Response, status, Depends, HTTPException, BackgroundTasks
 from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
-from app.api.api_v1 import registration
+from app.api.api_v1 import registration_router, auth_router
 
 router = APIRouter()
 
@@ -27,19 +27,6 @@ async def set_follow_cache(user_id, follow_user_id, **kwargs):
 async def getAllUsers():
     return IN_MEMORY_DB.find('users')
 
-
-@router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    print(form_data)
-    user = authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token = create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/users/me/", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
@@ -86,4 +73,5 @@ async def create_tweet(background_tasks: BackgroundTasks, current_user: User = D
 
     return feed
 
-router.include_router(registration.router, tags=['user-registration'])
+router.include_router(registration_router, tags=['user-registration'])
+router.include_router(auth_router, tags=['user-authentication'])
