@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app import api
+from app import apis
 
 app = FastAPI()
 
@@ -8,4 +8,4 @@ app = FastAPI()
 async def main():
     return {'message': "This is a Simple Twitter Like App"}
 
-app.include_router(api.router, prefix="/v1")
+app.include_router(apis.router, prefix="/v1")

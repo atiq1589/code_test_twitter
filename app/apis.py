@@ -7,6 +7,7 @@ from app.authentication import get_password_hash, Token, authenticate_user, crea
 from fastapi import APIRouter, Response, status, Depends, HTTPException, BackgroundTasks
 from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
+from app.api.api_v1 import registration
 
 router = APIRouter()
 
@@ -20,17 +21,6 @@ async def set_follow_cache(user_id, follow_user_id, **kwargs):
     users.append(follow_user_id)
     await set_cache(key, users, **kwargs)
     IN_MEMORY_DB.insert("user_follow", dict(user_id=user_id, follow_user_id=follow_user_id))
-
-@router.post('/register', status_code=status.HTTP_201_CREATED)
-async def register(user_form: UserRegistrationModel, response: Response):
-    if IN_MEMORY_DB.find('users', username=user_form.username):
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return dict(message="Username already found. Please choose a different username.")
-    else:
-        user = User(**user_form.dict())
-        user_dict = user.dict()
-        user_dict["hashed_password"] = get_password_hash(user_form.password)
-        IN_MEMORY_DB.insert('users', user_dict)
 
 
 @router.get('/users', response_model=List[User])
@@ -95,3 +85,5 @@ async def create_tweet(background_tasks: BackgroundTasks, current_user: User = D
         background_tasks.add_task(set_cache, feed_key, feed, ex=30)
 
     return feed
+
+router.include_router(registration.router, tags=['user-registration'])
