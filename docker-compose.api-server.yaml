@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  api-server:
+    container_name: twitter_api_server
+    build:
+      context: .
+      dockerfile: .
+    command: pipenv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/var/www/source_code
+    ports:
+      - 8000:8000
+    networks:
+      - twitter_redis_replica_cluster
+      - twitter_mongodb_router
+
+networks:
+  twitter_redis_replica_cluster:
+  twitter_mongodb_router:
+
+  
