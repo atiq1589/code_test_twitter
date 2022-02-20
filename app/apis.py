@@ -1,50 +1,28 @@
 import asyncio
+from pkgutil import get_data
 from app.cache import set_cache, get_cache
 from app.db import Database, in_memory
+from app.db.mongo import get_db
 from app.models import User, Tweet
 from app.models.forms import UserRegistrationModel, TweetModel
 from app.authentication import get_password_hash, Token, authenticate_user, create_access_token, get_current_user
 from fastapi import APIRouter, Response, status, Depends, HTTPException, BackgroundTasks
 from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
-from app.api.api_v1 import registration_router, auth_router
+from app.api.api_v1 import registration_router, auth_router, follow_router
 
 router = APIRouter()
 
 IN_MEMORY_DB = Database()
 
-async def set_follow_cache(user_id, follow_user_id, **kwargs):
-    key = f"{user_id}_USER_FOLLOW"
-    users = await get_cache(key)
-    if not users:
-        users = []
-    users.append(follow_user_id)
-    await set_cache(key, users, **kwargs)
-    IN_MEMORY_DB.insert("user_follow", dict(user_id=user_id, follow_user_id=follow_user_id))
-
 
 @router.get('/users', response_model=List[User])
-async def getAllUsers():
-    return IN_MEMORY_DB.find('users')
-
-
-@router.get("/users/me/", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
-
-
-@router.post('/follow', status_code=status.HTTP_201_CREATED)
-async def follow_user(follow_user_id: int, response: Response, background_tasks: BackgroundTasks, current_user: User = Depends(get_current_user)):
-    result = IN_MEMORY_DB.find('user_follow', user_id=current_user.id, follow_user_id=follow_user_id)
-    follow_user = IN_MEMORY_DB.find('users', id=follow_user_id)
-    if follow_user_id == current_user.id:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return dict(message="User can't follow ownself.")
-    if not follow_user:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return dict(message="Requested User not found.")
-    if not result:
-        background_tasks.add_task(set_follow_cache, current_user.id, follow_user_id)
+async def getAllUsers(current_user: User = Depends(get_current_user)):
+    db = get_db()
+    users = []
+    async for user in db.users.find():
+        users.append(user)
+    return users
 
 
 @router.post('/tweet', status_code=status.HTTP_201_CREATED)
@@ -75,3 +53,4 @@ async def create_tweet(background_tasks: BackgroundTasks, current_user: User = D
 
 router.include_router(registration_router, tags=['user-registration'])
 router.include_router(auth_router, tags=['user-authentication'])
+router.include_router(follow_router, tags=['social'])
