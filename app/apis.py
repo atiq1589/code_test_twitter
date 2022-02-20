@@ -1,15 +1,11 @@
-import asyncio
-from pkgutil import get_data
 from app.cache import set_cache, get_cache
-from app.db import Database, in_memory
+from app.db import Database
 from app.db.mongo import get_db
 from app.models import User, Tweet
-from app.models.forms import UserRegistrationModel, TweetModel
-from app.authentication import get_password_hash, Token, authenticate_user, create_access_token, get_current_user
-from fastapi import APIRouter, Response, status, Depends, HTTPException, BackgroundTasks
+from app.authentication import get_current_user
+from fastapi import APIRouter, status, Depends, BackgroundTasks
 from typing import List
-from fastapi.security import OAuth2PasswordRequestForm
-from app.api.api_v1 import registration_router, auth_router, follow_router
+from app.api.api_v1 import registration_router, auth_router, follow_router, tweet_router
 
 router = APIRouter()
 
@@ -23,12 +19,6 @@ async def getAllUsers(current_user: User = Depends(get_current_user)):
     async for user in db.users.find():
         users.append(user)
     return users
-
-
-@router.post('/tweet', status_code=status.HTTP_201_CREATED)
-def create_tweet(tweet: TweetModel, current_user: User = Depends(get_current_user)):
-    tweet_model = Tweet(**dict(user_id=current_user.id, body=tweet.body))
-    IN_MEMORY_DB.insert('tweets', tweet_model.dict())
 
 
 @router.get('/feed', status_code=status.HTTP_200_OK, response_model=List[Tweet])
@@ -54,3 +44,4 @@ async def create_tweet(background_tasks: BackgroundTasks, current_user: User = D
 router.include_router(registration_router, tags=['user-registration'])
 router.include_router(auth_router, tags=['user-authentication'])
 router.include_router(follow_router, tags=['social'])
+router.include_router(tweet_router, tags=['social'])
