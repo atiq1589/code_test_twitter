@@ -11,9 +11,9 @@ This application depends on PIPENV. it will help if it is already installed in y
 ## Run Application with Docker [Recommended]
 Please note at least 3 redis sentinel node required as quorum set to 2.
 up to 5 redis sentinel server can be added
-run `sh start.sh` to Start
-run `sh stop.sh` to Stop
-run `sh clean.sh` to Stop and Delete all the volumes =
+1. run `sh start.sh` to Start
+1. run `sh stop.sh` to Stop
+1. run `sh clean.sh` to Stop and Delete all the volumes =
 
 ## Check
 1. go to http://127.0.0.1:8000/docs or
