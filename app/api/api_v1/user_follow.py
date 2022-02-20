@@ -21,7 +21,7 @@ async def set_follow_cache(user_id, follow_user_id, **kwargs):
     key = f"{user_id}_USER_FOLLOW"
     users = await get_cache(key)
     if not users:
-        users = []
+        users = [user_id]
     users.append(follow_user_id)
     await set_cache(key, users, **kwargs)
     db.user_follow.insert_one(dict(user_id=user_id, follow_user_id=follow_user_id))

@@ -5,7 +5,7 @@ from app.models import User, Tweet
 from app.authentication import get_current_user
 from fastapi import APIRouter, status, Depends, BackgroundTasks
 from typing import List
-from app.api.api_v1 import registration_router, auth_router, follow_router, tweet_router
+from app.api.api_v1 import registration_router, auth_router, follow_router, tweet_router, feed_router
 
 router = APIRouter()
 
@@ -20,28 +20,8 @@ async def getAllUsers(current_user: User = Depends(get_current_user)):
         users.append(user)
     return users
 
-
-@router.get('/feed', status_code=status.HTTP_200_OK, response_model=List[Tweet])
-async def create_tweet(background_tasks: BackgroundTasks, current_user: User = Depends(get_current_user)):
-    follow_key = f"{current_user.id}_USER_FOLLOW"
-    feed_key = f"{current_user.id}_USER_FEED"
-    feed = await get_cache(feed_key)
-    user_follow = []
-    if not feed:
-        user_follow = await get_cache(follow_key)
-
-    if not user_follow and not feed:
-        user_follow = IN_MEMORY_DB.find('user_follow', user_id=current_user.id)
-        background_tasks.add_task(set_cache, follow_key, [current_user.id] + [user["follow_user_id"] for user in user_follow])
-
-    if not feed:
-        feed = IN_MEMORY_DB.find_in('tweets', user_id=user_follow)
-        feed.sort(key=lambda item: item['created_at'], reverse=True)
-        background_tasks.add_task(set_cache, feed_key, feed, ex=30)
-
-    return feed
-
 router.include_router(registration_router, tags=['user-registration'])
 router.include_router(auth_router, tags=['user-authentication'])
 router.include_router(follow_router, tags=['social'])
 router.include_router(tweet_router, tags=['social'])
+router.include_router(feed_router, tags=['social'])
