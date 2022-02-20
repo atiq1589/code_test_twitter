@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  config-svr-node1:
+    image: mongo:5.0.6
+    container_name: twitter_mongodb_cfg01
+    command: mongod --configsvr --replSet cfgrs --port 27017 --dbpath /data/db
+    restart: always
+    networks:
+      - twitter_mongodb_cfgrs_cluster
+      - twitter_mongodb_shard01_cluster
+      - twitter_mongodb_shard02_cluster
+    volumes:
+      - twitter_mongodb_cfg01:/data/db
+      - ./configs/scripts/replica_set_cfgrs_01.sh:/etc/mongo/config/replica_set_cfgrs_01.sh
+  config-svr-node2:
+    image: mongo:5.0.6
+    container_name: twitter_mongodb_cfg02
+    command: mongod --configsvr --replSet cfgrs --port 27017 --dbpath /data/db
+    restart: always
+    depends_on:
+      - config-svr-node1
+    networks:
+      - twitter_mongodb_cfgrs_cluster
+      - twitter_mongodb_shard01_cluster
+      - twitter_mongodb_shard02_cluster
+    volumes:
+      - twitter_mongodb_cfg02:/data/db
+  config-svr-node3:
+    image: mongo:5.0.6
+    container_name: twitter_mongodb_cfg03
+    command: mongod --configsvr --replSet cfgrs --port 27017 --dbpath /data/db
+    restart: always
+    depends_on:
+      - config-svr-node1
+    networks:
+      - twitter_mongodb_cfgrs_cluster
+      - twitter_mongodb_shard01_cluster
+      - twitter_mongodb_shard02_cluster
+    volumes:
+      - twitter_mongodb_cfg03:/data/db
+
+networks:
+  twitter_mongodb_cfgrs_cluster:
+  twitter_mongodb_shard01_cluster:
+  twitter_mongodb_shard02_cluster:
+
+volumes:
+  twitter_mongodb_cfg01:
+  twitter_mongodb_cfg02:
+  twitter_mongodb_cfg03:
+  
