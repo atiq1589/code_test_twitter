@@ -11,11 +11,13 @@ This application depends on PIPENV. it will help if it is already installed in y
 ## Run Application with Docker [Recommended]
 Please note at least 3 redis sentinel node required as quorum set to 2.
 up to 5 redis sentinel server can be added
-run `docker-compose up --scale redis-node-sentinel=3 -d`
+run `sh start.sh` to Start
+run `sh stop.sh` to Stop
+run `sh clean.sh` to Stop and Delete all the volumes =
 
 ## Check
-1. go to http://127.0.0.1:8000 or
+1. go to http://127.0.0.1:8000/docs or
 1. `curl 127.0.0.1:8000`
 
 ## Attach to API server
-`docker attach --sig-proxy=false tweeter_api_server`
+`docker attach --sig-proxy=false twitter_api_server`
