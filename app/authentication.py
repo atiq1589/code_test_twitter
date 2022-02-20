@@ -1,4 +1,4 @@
-from app.db import Database
+from app.db.mongo import get_db
 from app.models.users import User
 from datetime import datetime, timedelta
 from typing import Optional
@@ -14,8 +14,6 @@ from pydantic import BaseModel
 SECRET_KEY = "ce3cd9a36fc98914cae195c268421f4447aaf0704c70d4ffe12b073297d82028"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-IN_MEMORY_DB = Database()
 
 class Token(BaseModel):
     access_token: str
@@ -43,15 +41,15 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user(username: str):
-    users = IN_MEMORY_DB.find('users', username=username)
-    if users:
-        user_dict = users[0]
-        return UserInDB(**user_dict)
+async def get_user(username: str) -> UserInDB:
+    db = get_db()
+    user = await db.users.find_one( { "username": username } )
+    if user:
+        return UserInDB(**user)
 
 
-def authenticate_user(username: str, password: str):
-    user = get_user(username)
+async def authenticate_user(username: str, password: str):
+    user = await get_user(username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
