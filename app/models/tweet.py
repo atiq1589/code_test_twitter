@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field, constr
 
@@ -12,7 +11,7 @@ class Tweet(BaseModel):
     id: str = Field(default_factory=uuid.uuid4, alias="_id")
     user_id: uuid.UUID # BECAREFUL TO CHANGE THIS FIELD
     body: constr(min_length=3, max_length=140)
-    created_at: datetime = None
+    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
 
     class Config:
         allow_population_by_field_name = True
