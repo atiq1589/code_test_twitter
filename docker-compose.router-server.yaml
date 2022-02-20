@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  router-node1:
+    image: mongo:5.0.6
+    container_name: twitter_mongodb_router_01
+    command: mongos --configdb cfgrs/twitter_mongodb_cfg01:27017,twitter_mongodb_cfg01:27017,twitter_mongodb_cfg01:27017 --port 27017 --bind_ip 0.0.0.0
+    restart: always
+    networks:
+      - twitter_mongodb_router
+      - twitter_mongodb_cfgrs_cluster
+      - twitter_mongodb_shard01_cluster
+      - twitter_mongodb_shard02_cluster
+    volumes:
+      - ./configs/scripts/router01_shard_config.sh:/etc/mongo/config/router01_shard_config.sh
+
+networks:
+  twitter_mongodb_router:
+  twitter_mongodb_cfgrs_cluster:
+  twitter_mongodb_shard01_cluster:
+  twitter_mongodb_shard02_cluster:

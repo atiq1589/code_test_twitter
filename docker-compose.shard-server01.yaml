@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  shard01-node1:
+    image: mongo:5.0.6
+    container_name: twitter_mongodb_shard01_svr01
+    command: mongod --shardsvr --replSet shard01svr --port 27017 --dbpath /data/db
+    restart: always
+    networks:
+      - twitter_mongodb_shard01_cluster
+    volumes:
+      - twitter_mongodb_shard01_svr01:/data/db
+      - ./configs/scripts/replica_set_shard_01.sh:/etc/mongo/config/replica_set_shard_01.sh
+  shard01-node2:
+    image: mongo:5.0.6
+    container_name: twitter_mongodb_shard01_svr02
+    command: mongod --shardsvr --replSet shard01svr --port 27017 --dbpath /data/db
+    restart: always
+    depends_on:
+      - shard01-node1
+    networks:
+      - twitter_mongodb_shard01_cluster
+    volumes:
+      - twitter_mongodb_shard01_svr02:/data/db
+  shard01-node3:
+    image: mongo:5.0.6
+    container_name: twitter_mongodb_shard01_svr03
+    command: mongod --shardsvr --replSet shard01svr --port 27017 --dbpath /data/db
+    restart: always
+    depends_on:
+      - shard01-node1
+    networks:
+      - twitter_mongodb_shard01_cluster
+    volumes:
+      - twitter_mongodb_shard01_svr03:/data/db
+
+networks:
+  twitter_mongodb_shard01_cluster:
+
+volumes:
+  twitter_mongodb_shard01_svr01:
+  twitter_mongodb_shard01_svr02:
+  twitter_mongodb_shard01_svr03:
+  
