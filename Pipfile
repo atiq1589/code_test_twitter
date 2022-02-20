@@ -9,6 +9,7 @@ python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
 pytest = "*"
 aioredis = "*"
+motor = "*"
 
 [dev-packages]
 
