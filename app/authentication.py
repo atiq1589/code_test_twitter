@@ -7,11 +7,12 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-
+from app.settings import settings
 
 # to get a string like this run:
 # openssl rand -hex 32
-SECRET_KEY = "ce3cd9a36fc98914cae195c268421f4447aaf0704c70d4ffe12b073297d82028"
+# SECRET_KEY = "ce3cd9a36fc98914cae195c268421f4447aaf0704c70d4ffe12b073297d82028"
+SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

@@ -1,9 +1,10 @@
 import json
 import aioredis.sentinel
+from app.settings import settings
 
 addresses = []
-for i in range(5):
-    addresses.append(("redis-node-sentinel", 26379+i))
+for port in settings.CACHE_PORTS:
+    addresses.append((settings.CACHE_CONNECTION, port))
 
 sentinel = aioredis.sentinel.Sentinel(addresses)
 

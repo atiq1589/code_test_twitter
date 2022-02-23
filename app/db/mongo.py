@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Any
 from motor.motor_asyncio import AsyncIOMotorClient
-
+from app.settings import settings
 
 class Mongo:
     """
@@ -11,7 +11,7 @@ class Mongo:
    
     def __init__(self) -> None:
         # TODO: will replace with settings / environment 
-        self.client = AsyncIOMotorClient('mongodb://twitter_mongodb_router_01:27017')
+        self.client = AsyncIOMotorClient(settings.DB_CONNECTION)
 
     def __new__(cls, *args, **kwargs):
         if not isinstance(cls._instance, cls):
