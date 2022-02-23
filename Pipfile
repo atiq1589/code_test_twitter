@@ -10,6 +10,7 @@ passlib = {extras = ["bcrypt"], version = "*"}
 pytest = "*"
 aioredis = "*"
 motor = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
