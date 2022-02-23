@@ -1,6 +1,9 @@
 # Setup
 This application depends on PIPENV. it will help if it is already installed in your system
 
+## Generate Secrete Key
+run `openssl rand -hex 32`
+
 ## Install Dependencies
 1. run `pipenv install`
 
